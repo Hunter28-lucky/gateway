@@ -41,9 +41,9 @@ export default function PaymentWidget({ siteId }: PaymentWidgetProps) {
     try {
       let screenshotUrl = ''
       if (screenshot) {
-        // Sanitize file name: replace spaces and special characters with underscores
+        // Stronger sanitization: replace all whitespace (including Unicode) with underscores, then remove any character not allowed
         const originalName = screenshot.name
-        const sanitizedFileName = `${Date.now()}-${originalName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
+        const sanitizedFileName = `${Date.now()}-${originalName.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9._-]/g, '')}`
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('screenshots')
           .upload(sanitizedFileName, screenshot)
