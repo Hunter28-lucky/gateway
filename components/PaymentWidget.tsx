@@ -41,16 +41,18 @@ export default function PaymentWidget({ siteId }: PaymentWidgetProps) {
     try {
       let screenshotUrl = ''
       if (screenshot) {
-        const fileName = `${Date.now()}-${screenshot.name}`
+        // Sanitize file name: replace spaces and special characters with underscores
+        const originalName = screenshot.name
+        const sanitizedFileName = `${Date.now()}-${originalName.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('screenshots')
-          .upload(fileName, screenshot)
+          .upload(sanitizedFileName, screenshot)
         if (uploadError) {
           throw new Error(uploadError.message || 'Failed to upload screenshot')
         }
         const { data: urlData } = supabase.storage
           .from('screenshots')
-          .getPublicUrl(fileName)
+          .getPublicUrl(sanitizedFileName)
         screenshotUrl = urlData.publicUrl
       }
       const response = await fetch('/api/submit-payment', {
